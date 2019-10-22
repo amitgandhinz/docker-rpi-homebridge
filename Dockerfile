@@ -1,4 +1,4 @@
-FROM hypriot/rpi-node:8
+FROM node
 MAINTAINER ViViDboarder <vividboarder@gmail.com>
 
 ENV LANG en_US.UTF-8
@@ -15,18 +15,22 @@ RUN apt-get update && \
         apt-get clean && \
         rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
  
-RUN apt-get update && apt-get install libpcap-dev iputils-ping
+RUN apt-get update && \
+        apt-get install -y --no-install-recommends \
+        libpcap-dev \
+        iputils-ping \
+        dos2unix \
+        ffmpeg
 
 RUN npm config set unsafe-perm true
 
 RUN npm install -g --unsafe-perm \
         homebridge \
         hap-nodejs \
-        node-gyp && \
-    cd /usr/local/lib/node_modules/homebridge/ && \
-    npm install --unsafe-perm bignum && \
-    cd /usr/local/lib/node_modules/hap-nodejs/node_modules/mdns && \
-    node-gyp BUILDTYPE=Release rebuild
+        node-gyp
+
+RUN cd /usr/local/lib/node_modules/homebridge/
+RUN npm install --unsafe-perm bignum
 
 RUN mkdir -p /var/run/dbus/
 
@@ -39,5 +43,7 @@ VOLUME /root/.homebridge
 WORKDIR /root/.homebridge
 
 ADD start.sh /root/.homebridge/start.sh
+ADD plugins/plugins.txt /root/.homebridge/plugins/plugins.txt
+ADD config.json /root/.homebridge/config.json
 
-CMD /root/.homebridge/start.sh
+CMD dos2unix /root/.homebridge/start.sh && /root/.homebridge/start.sh

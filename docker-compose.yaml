@@ -1,9 +1,8 @@
 homebridge:
   build: .
+  net: host
   ports:
     - "51826:51826"
-  net: host
   volumes:
-    - ./config.json:/root/.homebridge/config.json
-    - ./plugins.txt:/root/.homebridge/plugins.txt
     - ./persist:/root/.homebridge/persist
+  restart: always
